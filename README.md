@@ -1,6 +1,6 @@
 # DefakeHop: A Light-Weight High-Performance Deepfake Detector
 
-This is the official Python implementation of our work: "[DefakeHop: A Light-Weight High-Performance Deepfake Detector](arxiv.org/abs/2103.06929)" accepted at ICME 2021.
+This is the official Python implementation of our work: ["DefakeHop: A Light-Weight High-Performance Deepfake Detector"](arxiv.org/abs/2103.06929) accepted at ICME 2021.
 
 State-of-the-art Deepfake detection methods are built upon deep neural networks. In this work, we proposed a non deep learning method to detect Deepfake videos which use the successive subspace learning (SSL) principle to extract features from various parts of face images. The features are also further distilled by our feature distillation module to derive a concise representation of the fake and real faces.
 
