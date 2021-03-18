@@ -8,17 +8,24 @@ State-of-the-art Deepfake detection methods are built upon deep neural networks.
 
 ## Required packages
 ```bash
+conda install -c anaconda pandas 
 conda install -c conda-forge opencv
 conda install -c conda-forge xgboost
 conda install -c anaconda scikit-image
 conda install -c conda-forge matplotlib
-conda install -c conda-forge scikit-learn 
+conda install -c conda-forge scikit-learn
 ```
 
 ## Preprocessing
 - Extracting the facial landmarks using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace)
-- Face alignment 
-- Crop the facial regions
+Please check [here](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Command-line-arguments) more more details.
+```
+FeatureExtraction -f [video path] -out_dir [output directory]
+```
+- Face alignment and Crop the facial regions
+```
+python preprocessing/extract_facial_regions.py [videos folder] [landmarks folder] [output directory]
+```
 
 ## How to run
 We use UADFV dataset as an example to show how to use our code to train and test the model.
@@ -32,7 +39,7 @@ When we train the model, we use three items to train.
 - Labels: 1D numpy array where 1 is Fake and 0 is Real. 
 - Names: 1D numpy array storing frame names. 
 
-    The frame name should follow the format of **video_name + frame_number**. 
+    The frame name should follow the format of **{video_name}_{frame_number}**. 
 
     Example: real/0047_0786.bmp, we can know it is the 786 th frame from real/0047.mp4
 ## Cite us
