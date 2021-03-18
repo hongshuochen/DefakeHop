@@ -16,14 +16,24 @@ conda install -c conda-forge matplotlib
 
 ## Preprocessing
 - Extracting the facial landmarks using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace)
-- Face alignment
-- Crop facial regions
+- Face alignment 
+- Crop the facial regions
 
 ## How to run
+We use UADFV dataset as an example to show how to use our code to train and test the model.
 ```bash
 python model.py
 ```
 
+When we train the model, we use three items to train.
+    
+- Images: 4D numpy array (N,H,W,C).
+- Labels: 1D numpy array where 1 is Fake and 0 is Real. 
+- Names: 1D numpy array storing frame names. 
+
+    The frame name should follow the format of **video_name + frame_number**. 
+
+    EX: real/0047_0786.bmp, And we can know it is the 786 th frame from real/0047.mp4
 ## Cite us
 If you use this repository, please consider to cite.
 ```
