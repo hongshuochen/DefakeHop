@@ -12,6 +12,7 @@ conda install -c conda-forge opencv
 conda install -c conda-forge xgboost
 conda install -c anaconda scikit-image
 conda install -c conda-forge matplotlib
+conda install -c conda-forge scikit-learn 
 ```
 
 ## Preprocessing
