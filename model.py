@@ -19,7 +19,9 @@ class Ensemble():
         self.predict_names = None
         self.verbose = verbose
 
-    def fit_region(self, region, images, labels, names):
+    def fit_region(self, region, images, labels, names, multi_cwSaab_parm):
+        # feed the data of a region to generate features for training
+        # calling this function several times for differnet regions
         if self.verbose:
             print("==============================" + region + "==============================")
         if len(self.defakeHop) == 0:
@@ -28,14 +30,15 @@ class Ensemble():
         else:
             assert np.array_equal(names, self.names), "the order of names are not aligned with previous regions"
             assert np.array_equal(labels, self.labels), "the order of labels are not aligned with previous regions"
-        defakehop = DefakeHop(num_hop=3, kernel_sizes=[3,3,3], split_thr=0.01, keep_thr=0.001, 
-                            max_channels=[10,10,10], spatial_components=[0.95,0.95,0.95], n_jobs=4, verbose=True)
+        defakehop = DefakeHop(**multi_cwSaab_parm)
         features = defakehop.fit(images, labels)
         self.defakeHop[region] = defakehop
         self.features[region] = features
         return self
 
     def predict_region(self, region, images, names):
+        # feed the data of a region to generate features for prediction
+        # calling this function several times for different regions
         if self.verbose:
             print("==============================" + region + "==============================")
         if self.predict_names is None:
@@ -45,6 +48,7 @@ class Ensemble():
         self.predict_features[region] = self.defakeHop[region].predict(images)
     
     def clean_buffer(self):
+        # clean the buffer for all regions
         self.features = {}
         self.labels = None
         self.names = None
@@ -52,6 +56,7 @@ class Ensemble():
         self.predict_names = None
         
     def concatenate_features(self, regions=None, train_flag=True):
+        # concatenate regions and adjacent frames features
         if self.verbose:
             print("===============Concatenation===============")
         if regions is None:
@@ -64,6 +69,7 @@ class Ensemble():
         return self.concatenate_frames_features(features, self.labels, names, train_flag=train_flag)
 
     def concatenate_regions_features(self, regions, train_flag):
+        # concatnate all regions features
         features = []
         for region in regions:
             if train_flag:
@@ -75,6 +81,7 @@ class Ensemble():
         return np.array(features).T
 
     def concatenate_frames_features(self, features, labels, names, train_flag):
+        # concatenate adjacent frames features
         frames_labels = []
         frames_names = []
         all_frames_features = []
@@ -100,6 +107,7 @@ class Ensemble():
         return all_frames_features, frames_labels, frames_names
 
     def train_classifier(self, folds=4, param_comb=20, clean=True):
+        # train the final classifier to decide whether the face real or fake
         features, labels, names = self.concatenate_features()
         if self.verbose:
             print("===============Training Classifier===============")
@@ -125,6 +133,7 @@ class Ensemble():
             self.clean_buffer()
         return prob, names
     def predict_classifier(self, clean=True):
+        # decide whether the face real or fake
         features, _, names = self.concatenate_features(train_flag=False)
         if self.verbose:
             print("===============Prediction===============")
@@ -135,7 +144,12 @@ class Ensemble():
         return prob, names
 
 if __name__ == '__main__':
-    model = Ensemble(regions=['left_eye', 'right_eye'])
+    # regions: left_eye, right_eye, mouth, ....
+    # num_frames: a positive integer value
+    model = Ensemble(regions=['left_eye', 'right_eye'], num_frames=6, verbose=True)
+    # more parameters for multi channel-wise Saab feature extraction
+    multi_cwSaab_parm = dict(num_hop=3, kernel_sizes=[3,3,3], split_thr=0.01, keep_thr=0.001, 
+                            max_channels=[10,10,10], spatial_components=[0.9,0.9,0.9], n_jobs=4, verbose=True)
     for region in model.regions:
         path = 'data/UADFV/' + region + '_UADFV.npz'
         data = np.load(path)
@@ -146,9 +160,8 @@ if __name__ == '__main__':
         train_labels = np.array(train_labels)
         train_names = np.array(train_names)
         print(train_images.shape)
-        model.fit_region(region, train_images, train_labels, train_names)
+        model.fit_region(region, train_images, train_labels, train_names, multi_cwSaab_parm)
     train_prob, train_vid_names = model.train_classifier()
-    
     for region in model.regions:
         path = 'data/UADFV/' + region + '_UADFV.npz'
         test_labels = data['test_labels']

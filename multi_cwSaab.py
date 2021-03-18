@@ -133,39 +133,13 @@ class MultiChannelWiseSaab():
 
 if __name__ == '__main__':
     import time
-    # from sklearn.datasets import fetch_olivetti_faces
-    # faces, _ = fetch_olivetti_faces(return_X_y=True, shuffle=True)
-    # data = faces.reshape(-1,64,64,1)
+    from sklearn.datasets import fetch_olivetti_faces
+    faces, _ = fetch_olivetti_faces(return_X_y=True, shuffle=True)
+    data = faces.reshape(-1,64,64,1)
 
-    # # test MultiChannelWiseSaab
+    # test MultiChannelWiseSaab
     multi_cwSaab = MultiChannelWiseSaab(num_hop=3, kernel_sizes=[3,3,3])
-    # multi_cwSaab.fit(data, verbose=True)
-    # output = multi_cwSaab.transform(data, verbose=True)
+    multi_cwSaab.fit(data, verbose=True)
+    output = multi_cwSaab.transform(data, verbose=True)
 
-    region = 'mouth'
-    path = 'data/UADFV/' + region + '_UADFV.npz'
-    data = np.load(path)
-    train_images = data['train_images']
-    train_labels = data['train_labels']
-    train_names = data['train_names']
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
-    train_names = np.array(train_names)
-
-    multi_cwSaab.fit(train_images,verbose=True) 
-    prob2 = multi_cwSaab.transform(train_images,verbose=True)
-
-    from old_cwSaab import ChannelWiseSaab
-
-    cw = ChannelWiseSaab(depth=3, TH1=0.01, TH2=0.001, channels=100, window=3)
-    cw.fit(train_images)
-    train_feature = cw.transform(train_images)
-
-    print(np.sum(np.abs(prob2['Hop1'] - train_feature[0])))
-    print(np.sum(np.abs(prob2['Hop2'] - train_feature[1])))
-    print(np.sum(np.abs(prob2['Hop3'] - train_feature[2])))
-
-    for i in range(len(multi_cwSaab.tmp)):
-        print(multi_cwSaab.tmp[i][0],multi_cwSaab.tmp[i][1])
-        print(np.sum(np.abs(multi_cwSaab.tmp[i][2] -cw.tmp[i][2][:,:,:,:multi_cwSaab.tmp[i][2].shape[-1]])))
 
