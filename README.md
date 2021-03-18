@@ -17,7 +17,7 @@ conda install -c conda-forge scikit-learn
 ```
 
 ## Preprocessing
-- Extracting the facial landmarks using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace)
+- Extracting the facial landmarks using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace).
 Please check [here](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Command-line-arguments) more more details.
 ```
 FeatureExtraction -f [video path] -out_dir [output directory]
