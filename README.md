@@ -2,7 +2,7 @@
 
 This is the official Python implementation of our work: "DefakeHop: A Light-Weight High-Performance Deepfake Detector" accepted at ICME 2021.
 
-State-of-the-art Deepfake detection methods are built upon deep neural networks. In this work, we proposed a non deep learning method to detect Deepfake videos which use the successive subspace learning (SSL) principle to extract features from various parts of face images. We also use feature distillation module to further extract concise representation of the fake and real faces.
+State-of-the-art Deepfake detection methods are built upon deep neural networks. In this work, we proposed a non deep learning method to detect Deepfake videos which use the successive subspace learning (SSL) principle to extract features from various parts of face images. The features are also further distilled by our feature distillation module to derive concise representation of the fake and real faces.
 
 ![Framework](img/framework.png)
 
@@ -33,7 +33,7 @@ When we train the model, we use three items to train.
 
     The frame name should follow the format of **video_name + frame_number**. 
 
-    EX: real/0047_0786.bmp, And we can know it is the 786 th frame from real/0047.mp4
+    Example: real/0047_0786.bmp, we can know it is the 786 th frame from real/0047.mp4
 ## Cite us
 If you use this repository, please consider to cite.
 ```
