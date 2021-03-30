@@ -146,6 +146,8 @@ class Ensemble():
 if __name__ == '__main__':
     # regions: left_eye, right_eye, mouth, ....
     # num_frames: a positive integer value
+    import multiprocessing
+    multiprocessing.set_start_method('spawn')
     model = Ensemble(regions=['left_eye', 'right_eye'], num_frames=6, verbose=True)
     # more parameters for multi channel-wise Saab feature extraction
     multi_cwSaab_parm = dict(num_hop=3, kernel_sizes=[3,3,3], split_thr=0.01, keep_thr=0.001, 
