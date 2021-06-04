@@ -33,8 +33,8 @@ def PatchExtraction(video_path, landmarks_path, output_dir, patch_size=32):
             break
         # if count % 6 == 0 and df[' success'][count] == 1:
         # if df[' success'][count] == 1:
-        if count % 6 == 0 and len(df[' success']) > count:
-            if df[' success'][count] == 1:
+        if count % 6 == 0 and len(df['success']) > count:
+            if df['success'][count] == 1:
                 frame = frame[:,:,::-1]
                 frames.append(frame)
                 frame_number.append(count)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     for video in videos:
         video_path = os.path.join(videos_path, video)
         video = video.replace('.mp4', '')
-        csv_path = os.path.join(landmarks_path, video, video + '.csv')
+        csv_path = os.path.join(landmarks_path, video + '.csv')
         output_path = os.path.join(output_dir, video)
         parameters.append([video_path, csv_path, output_path])
     pool = multiprocessing.Pool()
