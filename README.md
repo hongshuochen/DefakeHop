@@ -13,7 +13,11 @@ conda install -c conda-forge opencv
 conda install -c anaconda scikit-image
 conda install -c conda-forge matplotlib
 conda install -c conda-forge scikit-learn
-pip install xgboost
+```
+
+Since we use GPU to accelerate the processes, please install xgboost by pip
+```
+pip install xgboost 
 ```
 
 ## Data
