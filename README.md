@@ -10,21 +10,34 @@ State-of-the-art Deepfake detection methods are built upon deep neural networks.
 ```bash
 conda install -c anaconda pandas 
 conda install -c conda-forge opencv
-conda install -c conda-forge xgboost
 conda install -c anaconda scikit-image
 conda install -c conda-forge matplotlib
 conda install -c conda-forge scikit-learn
+pip install xgboost
 ```
+
+## Data
+Please put your videos in following folders accordingly
+- train
+    - real
+    - fake
+- test
+    - real
+    - fake
 
 ## Preprocessing
 - Extracting the facial landmarks using [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace).
 Please check [here](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Command-line-arguments) more more details.
 ```
-FeatureExtraction -f [video path] -out_dir [output directory]
+python landmark_extractor.py
 ```
 - Face alignment and Crop the facial regions
 ```
-python preprocessing/extract_facial_regions.py [videos folder] [landmarks folder] [output directory]
+python patch_extractor.py
+```
+- Get the training and testing data
+```
+python data.py
 ```
 
 ## How to run

@@ -121,7 +121,7 @@ class Ensemble():
         }
         labels = labels.astype(int)
         xgb = XGBClassifier(n_estimators=100, learning_rate=0.2, eval_metric='auc', objective='binary:logistic',
-                            tree_method='hist', scale_pos_weight=(len(labels[labels==0])/len(labels[labels==1])),
+                            tree_method='gpu_hist', scale_pos_weight=(len(labels[labels==0])/len(labels[labels==1])),
                             use_label_encoder=False)
         skf = StratifiedKFold(n_splits=folds, shuffle = True, random_state = 0)
         clf = RandomizedSearchCV(xgb, param_distributions=params, n_iter=param_comb, scoring='roc_auc', n_jobs=8, cv=skf.split(features,labels), random_state=1001)
@@ -146,6 +146,8 @@ class Ensemble():
 if __name__ == '__main__':
     # regions: left_eye, right_eye, mouth, ....
     # num_frames: a positive integer value
+    def vid_name(name):
+        return name.replace(name.split('_')[-1],'')[0:-1]
     import multiprocessing
     multiprocessing.set_start_method('spawn')
     model = Ensemble(regions=['left_eye', 'right_eye'], num_frames=6, verbose=True)
@@ -153,25 +155,19 @@ if __name__ == '__main__':
     multi_cwSaab_parm = dict(num_hop=3, kernel_sizes=[3,3,3], split_thr=0.01, keep_thr=0.001, 
                             max_channels=[10,10,10], spatial_components=[0.9,0.9,0.9], n_jobs=4, verbose=True)
     for region in model.regions:
-        path = 'data/UADFV/' + region + '_UADFV.npz'
+        path = 'data/' + region + '.train.npz'
         data = np.load(path)
-        train_images = data['train_images']
-        train_labels = data['train_labels']
-        train_names = data['train_names']
-        train_images = np.array(train_images)
-        train_labels = np.array(train_labels)
-        train_names = np.array(train_names)
+        train_images = data['images']
+        train_labels = data['labels']
+        train_names = data['names']
         print(train_images.shape)
         model.fit_region(region, train_images, train_labels, train_names, multi_cwSaab_parm)
     train_prob, train_vid_names = model.train_classifier()
     for region in model.regions:
-        path = 'data/UADFV/' + region + '_UADFV.npz'
-        test_labels = data['test_labels']
-        test_images = data['test_images']
-        test_names = data['test_names']
-        test_images = np.array(test_images)
-        test_labels = np.array(test_labels)
-        test_names = np.array(test_names)
+        path = 'data/UADFV/' + region + '.test.npz'
+        test_labels = data['labels']
+        test_images = data['images']
+        test_names = data['names']
         model.predict_region(region, test_images, test_names)
 
     prob, names = model.predict_classifier()

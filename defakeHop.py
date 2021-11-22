@@ -146,13 +146,13 @@ def fit_all_channel_wise_clf(features, labels, n_jobs=4):
         for channel in range(len(features[hop])):
             parameters.append([features[hop][channel], labels, hop, channel])
     
-    pool = multiprocessing.Pool(n_jobs)
+    pool = multiprocessing.Pool(1)
     pool.starmap(fit_channel_wise_clf, parameters)
 
 def fit_channel_wise_clf(features, labels, hop, channel):
     print("===Hop", hop, "Channel",  channel, "Start===")
     labels = labels.astype(int)
-    clf = XGBClassifier(max_depth=1, tree_method='hist', objective='binary:logistic', eval_metric='auc', 
+    clf = XGBClassifier(max_depth=1, tree_method='gpu_hist', objective='binary:logistic', eval_metric='auc', 
                         scale_pos_weight=(len(labels[labels==0])/len(labels[labels==1])), 
                         use_label_encoder=False)
     clf.fit(features, labels)
