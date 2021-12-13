@@ -34,7 +34,7 @@ def load(real_path, fake_path, region = 'left_eye'):
 
 if __name__ == '__main__':
     for split in ["train", "test"]:
-        for region in ["left_eye", "right_eye", "mouth", "nose"]:
+        for region in ["left_eye", "right_eye", "mouth"]:
             print(region)
             images, labels, names = load(split + "/real", split + "/fake", region=region)
             np.savez("data/" + region + '.' + split + '.npz', images=images, labels=labels, names=names)
