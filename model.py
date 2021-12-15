@@ -150,7 +150,7 @@ if __name__ == '__main__':
         return name.replace(name.split('_')[-1],'')[0:-1]
     import multiprocessing
     multiprocessing.set_start_method('spawn')
-    model = Ensemble(regions=['left_eye', 'right_eye'], num_frames=6, verbose=True)
+    model = Ensemble(regions=['left_eye', 'right_eye', 'mouth'], num_frames=6, verbose=True)
     # more parameters for multi channel-wise Saab feature extraction
     multi_cwSaab_parm = dict(num_hop=3, kernel_sizes=[3,3,3], split_thr=0.01, keep_thr=0.001, 
                             max_channels=[10,10,10], spatial_components=[0.9,0.9,0.9], n_jobs=4, verbose=True)
@@ -175,4 +175,7 @@ if __name__ == '__main__':
     print("===============Training Results===============")
     utils.evaluate(train_prob, train_vid_names)
     print("===============Testing Results===============")
-    utils.evaluate(prob, names)
+    vid_gts , vid_probs, vid_names = utils.evaluate(prob, names)
+    import pandas as pd
+    df = pd.DataFrame({'name':vid_names, 'label':vid_gts, 'prob':vid_probs})
+    df.to_csv('output.csv', index=False)

@@ -40,4 +40,5 @@ def evaluate(probs, names):
     fpr, tpr, thresholds = metrics.roc_curve(vid_gts, vid_probs)
     roc_auc = metrics.auc(fpr, tpr)
     print("Video AUC", roc_auc)
-    return fpr, tpr, roc_auc
+    # return fpr, tpr, roc_auc
+    return vid_gts , vid_probs, vid_names
