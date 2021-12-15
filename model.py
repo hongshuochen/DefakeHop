@@ -164,7 +164,8 @@ if __name__ == '__main__':
         model.fit_region(region, train_images, train_labels, train_names, multi_cwSaab_parm)
     train_prob, train_vid_names = model.train_classifier()
     for region in model.regions:
-        path = 'data/UADFV/' + region + '.test.npz'
+        path = 'data/' + region + '.test.npz'
+        data = np.load(path)
         test_labels = data['labels']
         test_images = data['images']
         test_names = data['names']
