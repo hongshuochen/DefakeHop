@@ -108,7 +108,7 @@ class Saab():
         else:
             return np.matmul(patches, kernels).reshape(N, H, W, n_channels)
 
-    def transform(self, images, n_channels=-1, batch_size=100000):
+    def transform(self, images, n_channels=-1, batch_size=50000):
         images = np.array(images)
         images = images.astype('float64')
 
@@ -173,11 +173,3 @@ if __name__ == '__main__':
     assert np.sum(np.abs(pca.explained_variance_ - saab.eigenvalues)) <= 10**-10
     print("dot product of eigenvectors of sklearn pca and numpy pca:")
     print(np.diag(np.matmul(pca.components_, saab.eigenvectors)))
-
-# ===============Testing Results===============
-# Frame AUC 0.934694544507239
-# Video AUC 0.9622241086587437
-
-# ===============Testing Results===============
-# Frame AUC 0.9403577749963334
-# Video AUC 0.9622241086587436
