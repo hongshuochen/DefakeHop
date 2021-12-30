@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import linalg as LA
+from numpy import linalg as LA, sqrt
 from skimage.util.shape import view_as_windows
 
 class Saab():
@@ -12,12 +12,7 @@ class Saab():
         self.bias_flag = bias_flag
 
     def PCA(self, X):
-        # remove mean
-        X = X - X.mean(axis=0)
-
         # calculate covariance matrix and calculate eigenvalues and eigenvectors of the covariance matrix
-        # / (X.shape[0] - 1)) to make it consistent with the sklearn pca
-        # self.eigenvalues, self.eigenvectors = LA.eig(np.matmul(X.transpose(), X)/ (X.shape[0] - 1))
         self.eigenvalues, self.eigenvectors = LA.eig(np.cov(X, rowvar=0))
         
         # absolute value of the eigenvalues
@@ -26,7 +21,10 @@ class Saab():
         # sort from the largest to the smallest
         idx = np.argsort(self.eigenvalues)[::-1]
         self.eigenvalues = self.eigenvalues[idx]
+        self.eigenvalues = self.eigenvalues[:-1]
         self.eigenvectors = self.eigenvectors[:, idx]
+        self.eigenvectors = self.eigenvectors[:,:-1]
+
         return self
     
     def patch_extraction(self, images):
@@ -43,7 +41,7 @@ class Saab():
 
         # subsample images
         if len(images) > max_images:
-            print("sampling images")
+            print("sampling " + str(max_images) + " images")
             np.random.seed(seed)
             images = images[np.random.choice(len(images),max_images, replace=False), :]
         N = images.shape[0]
@@ -55,14 +53,14 @@ class Saab():
         patches = self.patch_extraction(images)
         del images
         if len(patches) > max_patches:
-            print("sampling patches")
+            print("sampling " + str(max_patches) + " patches")
             np.random.seed(seed)
             patches = patches[np.random.choice(len(patches), max_patches, replace=False), :]
 
         # flatten
         patches = patches.reshape(N*H*W, C)
         if self.bias_flag:
-            self.bias=np.max(LA.norm(patches, axis=1))/np.sqrt(C)
+            self.bias=np.max(LA.norm(patches, axis=1))
 
         # remove mean
         self.features_mean = np.mean(patches,axis=0,keepdims=True)
@@ -71,33 +69,25 @@ class Saab():
         # remove patches mean
         patches_mean = np.mean(patches,axis=1,keepdims=True)
         patches -= patches_mean
-
-        # dc_ev = np.var(patches_mean * np.sqrt(patches.shape[-1]))
-        # dc_kernel =  np.ones((patches.shape[-1], 1))/np.sqrt(dc_ev)/np.sqrt(patches.shape[-1])
         
         # calculate eigenvectors and eigenvalues
         self.PCA(patches)
 
-        # self.eigenvectors = np.concatenate((dc_kernel, self.eigenvectors[:,:-1]), axis=1)
-        # self.eigenvalues = np.concatenate((np.array([dc_ev]), self.eigenvalues[:-1]), axis=0)
         return self
-    
-    def transform(self, images, n_channels=-1):
-        images = np.array(images)
-        images = images.astype('float64')
 
+    def _transform_batch(self, images, n_channels=-1):
         N = images.shape[0]
         H = images.shape[1] - self.kernel_size + 1
         W = images.shape[2] - self.kernel_size + 1
         C = images.shape[3] * self.kernel_size**2
 
-        # collect patches
+        # Create patches
         patches = self.patch_extraction(images)
         del images
-
+        
         # flatten
         patches = patches.reshape(N*H*W, C)
-
+        
         # remove mean
         patches -= self.features_mean
 
@@ -105,18 +95,46 @@ class Saab():
         patches_mean = np.mean(patches,axis=1,keepdims=True)
         patches -= patches_mean
         
-
         if n_channels == -1:
             kernels = self.eigenvectors
-            n_channels = len(self.eigenvalues)
+            n_channels = C-1
+
         else:
             kernels = self.eigenvectors[:,:n_channels]
 
         if self.bias_flag:
-            patches=patches+self.bias
+            patches=patches+self.bias/sqrt(C)
             return np.matmul(patches, kernels).reshape(N, H, W, n_channels)
         else:
             return np.matmul(patches, kernels).reshape(N, H, W, n_channels)
+
+    def transform(self, images, n_channels=-1, batch_size=100000):
+        images = np.array(images)
+        images = images.astype('float64')
+
+        N = images.shape[0]
+        H = images.shape[1] - self.kernel_size + 1
+        W = images.shape[2] - self.kernel_size + 1
+        C = images.shape[3] * self.kernel_size**2
+        if n_channels == -1:
+            n_channels = C-1
+
+        if N < batch_size:
+            output = self._transform_batch(images, n_channels=n_channels)
+            return output
+        else:
+            output = np.zeros((N, H, W, n_channels), dtype="float64")
+            for i in range(N//batch_size):
+                print("Batch", i, "from", i*batch_size , "to", (i+1)*batch_size-1)
+                out = self._transform_batch(images[i*batch_size:(i+1)*batch_size], n_channels=n_channels)
+                output[i*batch_size:(i+1)*batch_size] = out
+                del out
+            if N % batch_size != 0:
+                print("Batch", N//batch_size, "from", (N//batch_size)*batch_size , "to", N-1)
+                out = self._transform_batch(images[(N//batch_size)*batch_size:N], n_channels=n_channels)
+                output[(N//batch_size)*batch_size:N] = out
+                del out
+            return output
                 
 if __name__ == '__main__':
     import time
@@ -155,3 +173,11 @@ if __name__ == '__main__':
     assert np.sum(np.abs(pca.explained_variance_ - saab.eigenvalues)) <= 10**-10
     print("dot product of eigenvectors of sklearn pca and numpy pca:")
     print(np.diag(np.matmul(pca.components_, saab.eigenvectors)))
+
+# ===============Testing Results===============
+# Frame AUC 0.934694544507239
+# Video AUC 0.9622241086587437
+
+# ===============Testing Results===============
+# Frame AUC 0.9403577749963334
+# Video AUC 0.9622241086587436
