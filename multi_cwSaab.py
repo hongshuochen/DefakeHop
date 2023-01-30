@@ -14,7 +14,7 @@ class MultiChannelWiseSaab():
         self.energies = {}
         self.features = {}
         self.info = {}
-        self.tmp = []
+        # self.tmp = []
 
     def fit(self, images, verbose=False):
         start = time.time()
@@ -104,7 +104,7 @@ class MultiChannelWiseSaab():
                     self.energies['Hop' + str(n)].append(energies)
                     n_channels = np.sum(energies> self.keep_thr)
                     output = saab.transform(features, n_channels)
-                    self.tmp.append((saab_id,channel_id,self.max_pooling(output)))
+                    # self.tmp.append((saab_id,channel_id,self.max_pooling(output)))
                     self.features['Hop' + str(n)].append(self.max_pooling(output))
                     self.info['Hop' + str(n)].append((saab_id, channel_id, n_channels))
                     if verbose:
