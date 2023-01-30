@@ -1,0 +1,6 @@
+train/
+test/
+__pycache__/
+data/
+patches/
+landmarks/
