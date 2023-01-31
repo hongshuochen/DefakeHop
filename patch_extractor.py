@@ -6,6 +6,7 @@ import multiprocessing
 from PIL import Image
 from face_aligner import FaceAligner
 from face_aligner import FACIAL_LANDMARKS_68_IDXS
+from config import Config
 
 def save(img, filename):
     Image.fromarray(img).save(filename)
@@ -22,7 +23,10 @@ def PatchExtractor(video_path, landmarks_path, output_dir, patch_size=32):
     frame_number = []
     if os.path.exists(landmarks_path) == False:
         return
-    df = pd.read_csv(landmarks_path)
+    if os.path.exists(output_dir):
+        print(output_dir, " already exists, skipping")
+        return False
+    df = pd.read_csv(landmarks_path, sep=',\s*', engine='python')
     cap = cv2.VideoCapture(video_path)
     count = 0
     while(cap.isOpened()):
@@ -44,8 +48,8 @@ def PatchExtractor(video_path, landmarks_path, output_dir, patch_size=32):
             os.makedirs(directory)
 
     for idx, frame in enumerate(frames):
-        x = np.array(df.iloc[frame_number[idx],299:299+68]).reshape(68,-1)
-        y = np.array(df.iloc[frame_number[idx],299+68:299+68*2]).reshape(68,-1)
+        x = np.array(df.iloc[frame_number[idx],5:5+68]).reshape(68,-1)
+        y = np.array(df.iloc[frame_number[idx],5+68:5+68*2]).reshape(68,-1)
         z = np.ones(68).reshape(68,-1)
         landmarks = np.concatenate((x,y), axis=1)
         aligner = FaceAligner(desiredLeftEye=(0.35, 0.35), desiredFaceWidth=128, desiredFaceHeight=128*2)
@@ -90,7 +94,11 @@ if __name__ == "__main__":
                 video = video.replace('.mp4', '')
                 csv_path = os.path.join("landmarks/" + path, video, video + '.csv')
                 output_path = os.path.join(output_dir, path, video)
-                params.append([video_path, csv_path, output_path])
+                if Config.debug:
+                    PatchExtractor(video_path, csv_path, output_path)
+                else:
+                    params.append([video_path, csv_path, output_path])
 
-    pool = multiprocessing.Pool(8)
-    pool.starmap(PatchExtractor, params)
+        if not Config.debug:
+            pool = multiprocessing.Pool(8)
+            pool.starmap(PatchExtractor, params)

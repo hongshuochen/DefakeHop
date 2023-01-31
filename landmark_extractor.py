@@ -1,10 +1,14 @@
 import os
 import multiprocessing
 
+OPENFACE_EXE_DIR = "/home/techsigncloud/ExtLibs/OpenFace/build/bin"
+
 def LandmarkExtractor(file_path, output_dir):
+    if os.path.exists(output_dir):
+        print(file_path, " already exists, skipping")
+        return False
     print("Input: ", file_path)
-    stream = os.popen("OpenFace/build/bin/FeatureExtraction -f '{input}' -out_dir '{output}'"
-            .format(input = file_path, output = output_dir))
+    stream = os.popen(f"{OPENFACE_EXE_DIR}/FeatureExtraction -f {file_path} -2Dfp -out_dir {output_dir}")
     output = stream.read()
     print("Output:", output_dir)
     return True
